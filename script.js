@@ -1,6 +1,5 @@
 const operators = document.querySelectorAll('.operator');
 const digits = document.querySelectorAll('.digit');
-const extras = document.querySelectorAll('.extras');
 const screen = document.getElementById('screen');
 const equal = document.getElementById('equal');
 const clear = document.getElementById('clear');
@@ -9,17 +8,24 @@ const negative = document.getElementById('plus-minus');
 const decimal = document.getElementById('decimal');
 const percent = document.getElementById('percent');
 
-let firstOperand = '';
+let firstOperand = screen.textContent;
 let secondOperand = '';
 let currentOperator = null;
 let shouldClearScreen = false;
+const validOperators = ['+', '-', '/', '*'];
 
 function selectDigit(e) {
+  console.log(e);
   if (shouldClearScreen) {
     screen.textContent = '';
     shouldClearScreen = false;
   }
-  let currentDigit = e.target.textContent;
+  let currentDigit = null;
+  if (e.type === 'click') {
+    currentDigit = e.target.textContent;
+  } else if (e.type === 'keyup') {
+    currentDigit = e.key;
+  }
   if (currentOperator === null) {
     firstOperand += currentDigit;
     console.log(firstOperand);
@@ -29,14 +35,24 @@ function selectDigit(e) {
   }
 
   if (screen.textContent === '0') {
-    screen.textContent = currentDigit;
+    screen.textContent += currentDigit;
   } else {
     screen.textContent += currentDigit;
+  }
+
+  if (screen.textContent.charAt(0) === '0' && currentDigit !== '0') {
+    screen.textContent = screen.textContent.slice(1);
   }
 }
 
 function selectOperator(e) {
-  let selectedOperator = e.target.textContent;
+  let selectedOperator = null;
+
+  if (e.type === 'click') {
+    selectedOperator = e.target.textContent;
+  } else if (e.type === 'keyup') {
+    selectedOperator = e.key;
+  }
 
   if (currentOperator !== null && secondOperand !== '') {
     operate(e, true);
@@ -115,22 +131,29 @@ function operate(e, isOperator = false) {
 }
 
 function clearResult() {
-  firstOperand = '';
+  screen.textContent = '0';
+  firstOperand = screen.textContent;
   secondOperand = '';
   currentOperator = null;
-  shouldClearScreen = true;
-  screen.textContent = '0';
+  shouldClearScreen = false;
 }
 
 function delLastNum() {
   let length = 0;
   if (currentOperator === null) {
+    if (firstOperand === 0) {
+      return;
+    }
+
     length = firstOperand.includes('-')
       ? firstOperand.length - 1
       : firstOperand.length;
     firstOperand = length > 1 ? firstOperand.slice(0, -1) : firstOperand;
     screen.textContent = firstOperand;
   } else {
+    if (secondOperand === '0') {
+      return;
+    }
     length = secondOperand.includes('-')
       ? secondOperand.length - 1
       : secondOperand.length;
@@ -154,31 +177,6 @@ function makeNegative() {
   }
 }
 
-// function makeNegative() {
-//   if (currentOperator === null) {
-//     firstOperand = firstOperand.toString();
-//     firstOperand = firstOperand.startsWith('-')
-//       ? firstOperand.slice(1)
-//       : '-' + firstOperand;
-//     screen.textContent = firstOperand;
-//   } else if (secondOperand) {
-//     secondOperand = secondOperand.startsWith('-')
-//       ? secondOperand.slice(1)
-//       : '-' + secondOperand;
-//     screen.textContent = secondOperand;
-//   }
-
-//   if (firstOperand < 0) {
-//     firstOperand = Math.abs(firstOperand);
-//     screen.textContent = firstOperand;
-//     return;
-//   } else if (secondOperand < 0) {
-//     secondOperand = Math.abs(secondOperand);
-//     screen.textContent = secondOperand;
-//     return;
-//   }
-// }
-
 function makeDecimal() {
   if (currentOperator === null) {
     firstOperand = firstOperand.includes('.')
@@ -198,6 +196,7 @@ function togglePercent(number) {
 }
 
 function makePercent() {
+  firstOperand = screen.textContent;
   if (currentOperator === null || secondOperand === '') {
     firstOperand = togglePercent(firstOperand);
     screen.textContent = firstOperand;
@@ -226,3 +225,16 @@ operators.forEach(operator => {
 digits.forEach(digit => {
   digit.addEventListener('click', selectDigit);
 });
+
+function handleKeyup(e) {
+  console.log(e);
+  if (validOperators.includes(e.key)) {
+    selectOperator(e);
+  } else if (!isNaN(e.key)) {
+    selectDigit(e);
+  } else if (e.key === 'Enter') {
+    operate(e.key);
+  }
+}
+
+document.addEventListener('keyup', handleKeyup);
