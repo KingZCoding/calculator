@@ -72,9 +72,12 @@ button:active {
   background-color: #ff9500;
   color: white;
 }
-
-.button-right:hover {
-  /* background-color: #ffab40; */
+#plus:hover,
+#minus:hover,
+#multiply:hover,
+#divide:hover,
+#del:hover {
+  background-color: orange;
 }
 
 /* Clear and equal buttons */

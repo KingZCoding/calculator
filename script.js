@@ -71,9 +71,14 @@ function multiply() {
 }
 
 function divide() {
-  return parseFloat(
-    (parseFloat(firstOperand) / parseFloat(secondOperand)).toFixed(3)
-  );
+  if (secondOperand > 0) {
+    return parseFloat(
+      (parseFloat(firstOperand) / parseFloat(secondOperand)).toFixed(3)
+    );
+  } else {
+    alert(`You can't divide by 0!! Please input a new number to divide by!!`);
+  }
+  selectDigit();
 }
 
 function operate(e, isOperator = false) {
