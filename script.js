@@ -127,30 +127,45 @@ function delLastNum() {
   }
 }
 
-function makeNegative() {
-  if (currentOperator === null) {
-    firstOperand = firstOperand.toString();
-    firstOperand = firstOperand.startsWith('-')
-      ? firstOperand.slice(1)
-      : '-' + firstOperand;
-    screen.textContent = firstOperand;
-  } else if (secondOperand) {
-    secondOperand = secondOperand.startsWith('-')
-      ? secondOperand.slice(1)
-      : '-' + secondOperand;
-    screen.textContent = secondOperand;
-  }
+function toggleSign(number) {
+  return (parseFloat(number) * -1).toString();
+}
 
-  if (firstOperand < 0) {
-    firstOperand = Math.abs(firstOperand);
+function makeNegative() {
+  if (currentOperator == null || secondOperand == '') {
+    firstOperand = screen.textContent;
+    firstOperand = toggleSign(firstOperand);
     screen.textContent = firstOperand;
-    return;
-  } else if (secondOperand < 0) {
-    secondOperand = Math.abs(secondOperand);
+  } else {
+    secondOperand = toggleSign(secondOperand);
     screen.textContent = secondOperand;
-    return;
   }
 }
+
+// function makeNegative() {
+//   if (currentOperator === null) {
+//     firstOperand = firstOperand.toString();
+//     firstOperand = firstOperand.startsWith('-')
+//       ? firstOperand.slice(1)
+//       : '-' + firstOperand;
+//     screen.textContent = firstOperand;
+//   } else if (secondOperand) {
+//     secondOperand = secondOperand.startsWith('-')
+//       ? secondOperand.slice(1)
+//       : '-' + secondOperand;
+//     screen.textContent = secondOperand;
+//   }
+
+//   if (firstOperand < 0) {
+//     firstOperand = Math.abs(firstOperand);
+//     screen.textContent = firstOperand;
+//     return;
+//   } else if (secondOperand < 0) {
+//     secondOperand = Math.abs(secondOperand);
+//     screen.textContent = secondOperand;
+//     return;
+//   }
+// }
 
 function makeDecimal() {
   if (currentOperator === null) {
@@ -166,10 +181,17 @@ function makeDecimal() {
   }
 }
 
+function togglePercent(number) {
+  return parseFloat(number / 100).toString();
+}
+
 function makePercent() {
-  if (firstOperand) {
-    firstOperand = (parseFloat(firstOperand) * 100) / 2;
+  if (currentOperator === null || secondOperand === '') {
+    firstOperand = togglePercent(firstOperand);
     screen.textContent = firstOperand;
+  } else {
+    secondOperand = togglePercent(secondOperand);
+    screen.textContent = secondOperand;
   }
 }
 
