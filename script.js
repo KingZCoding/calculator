@@ -118,11 +118,18 @@ function clearResult() {
 }
 
 function delLastNum() {
+  let length = 0;
   if (currentOperator === null) {
-    firstOperand = firstOperand.length > 1 ? firstOperand.slice(0, -1) : '0';
+    length = firstOperand.includes('-')
+      ? firstOperand.length - 1
+      : firstOperand.length;
+    firstOperand = length > 1 ? firstOperand.slice(0, -1) : firstOperand;
     screen.textContent = firstOperand;
   } else {
-    secondOperand = secondOperand.length > 1 ? secondOperand.slice(0, -1) : '0';
+    length = secondOperand.includes('-')
+      ? secondOperand.length - 1
+      : secondOperand.length;
+    secondOperand = length > 1 ? secondOperand.slice(0, -1) : secondOperand;
     screen.textContent = secondOperand;
   }
 }

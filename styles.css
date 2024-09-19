@@ -63,13 +63,17 @@ button:active {
 }
 
 /* Special styles for operator buttons */
-.button-right {
-  background-color: #ff9500;
-  color: white;
+#plus,
+#minus,
+#multiply,
+#divide,
+#del {
+  /* background-color: #ff9500; */
+  background-color: orange;
 }
 
 .button-right:hover {
-  background-color: #ffab40;
+  /* background-color: #ffab40; */
 }
 
 /* Clear and equal buttons */
