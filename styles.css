@@ -69,7 +69,8 @@ button:active {
 #divide,
 #del {
   /* background-color: #ff9500; */
-  background-color: orange;
+  background-color: #ff9500;
+  color: white;
 }
 
 .button-right:hover {
