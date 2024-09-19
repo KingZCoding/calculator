@@ -5,6 +5,9 @@ const screen = document.getElementById('screen');
 const equal = document.getElementById('equal');
 const clear = document.getElementById('clear');
 const del = document.getElementById('del');
+const negative = document.getElementById('plus-minus');
+const decimal = document.getElementById('decimal');
+const percent = document.getElementById('percent');
 
 let firstOperand = '';
 let secondOperand = '';
@@ -34,9 +37,15 @@ function selectDigit(e) {
 
 function selectOperator(e) {
   let selectedOperator = e.target.textContent;
+
   if (currentOperator !== null && secondOperand !== '') {
-    operate();
+    operate(e, true);
   }
+
+  if (firstOperand !== screen.textContent) {
+    firstOperand = screen.textContent;
+  }
+
   currentOperator = selectedOperator;
   shouldClearScreen = true;
 
@@ -44,23 +53,41 @@ function selectOperator(e) {
 }
 
 function add() {
-  return parseFloat(firstOperand) + parseFloat(secondOperand);
+  return parseFloat(
+    (parseFloat(firstOperand) + parseFloat(secondOperand)).toFixed(3)
+  );
 }
 
 function subtract() {
-  return parseFloat(firstOperand) - parseFloat(secondOperand);
+  return parseFloat(
+    (parseFloat(firstOperand) - parseFloat(secondOperand)).toFixed(3)
+  );
 }
 
 function multiply() {
-  return parseFloat(firstOperand) * parseFloat(secondOperand);
+  return parseFloat(
+    (parseFloat(firstOperand) * parseFloat(secondOperand)).toFixed(3)
+  );
 }
 
 function divide() {
-  return parseFloat(firstOperand) / parseFloat(secondOperand);
+  return parseFloat(
+    (parseFloat(firstOperand) / parseFloat(secondOperand)).toFixed(3)
+  );
 }
 
-function operate() {
+function operate(e, isOperator = false) {
   let result = 0;
+
+  if (currentOperator == null) {
+    return;
+  }
+
+  if (firstOperand != '' && secondOperand == '') {
+    secondOperand = firstOperand;
+    firstOperand = screen.textContent;
+  }
+
   if (currentOperator === '+') {
     result = add();
   } else if (currentOperator === '-') {
@@ -70,11 +97,15 @@ function operate() {
   } else if (currentOperator === '/') {
     result = divide();
   }
+
+  if (Number.isInteger(result)) {
+    result = result.toString();
+  }
   screen.textContent = result;
 
-  firstOperand = result.toString();
+  firstOperand = isOperator ? result.toString() : secondOperand;
   secondOperand = '';
-  currentOperator = null;
+  currentOperator = isOperator ? null : currentOperator;
   shouldClearScreen = true;
 }
 
@@ -96,11 +127,63 @@ function delLastNum() {
   }
 }
 
+function makeNegative() {
+  if (currentOperator === null) {
+    firstOperand = firstOperand.toString();
+    firstOperand = firstOperand.startsWith('-')
+      ? firstOperand.slice(1)
+      : '-' + firstOperand;
+    screen.textContent = firstOperand;
+  } else if (secondOperand) {
+    secondOperand = secondOperand.startsWith('-')
+      ? secondOperand.slice(1)
+      : '-' + secondOperand;
+    screen.textContent = secondOperand;
+  }
+
+  if (firstOperand < 0) {
+    firstOperand = Math.abs(firstOperand);
+    screen.textContent = firstOperand;
+    return;
+  } else if (secondOperand < 0) {
+    secondOperand = Math.abs(secondOperand);
+    screen.textContent = secondOperand;
+    return;
+  }
+}
+
+function makeDecimal() {
+  if (currentOperator === null) {
+    firstOperand = firstOperand.includes('.')
+      ? firstOperand
+      : firstOperand + '.';
+    screen.textContent = firstOperand;
+  } else {
+    secondOperand = secondOperand.includes('.')
+      ? secondOperand
+      : secondOperand + '.';
+    screen.textContent = secondOperand;
+  }
+}
+
+function makePercent() {
+  if (firstOperand) {
+    firstOperand = (parseFloat(firstOperand) * 100) / 2;
+    screen.textContent = firstOperand;
+  }
+}
+
 equal.addEventListener('click', operate);
 
 clear.addEventListener('click', clearResult);
 
 del.addEventListener('click', delLastNum);
+
+negative.addEventListener('click', makeNegative);
+
+decimal.addEventListener('click', makeDecimal);
+
+percent.addEventListener('click', makePercent);
 
 operators.forEach(operator => {
   operator.addEventListener('click', selectOperator);
