@@ -27,21 +27,21 @@ function selectDigit(e) {
     currentDigit = e.key;
   }
   if (currentOperator === null) {
-    firstOperand += currentDigit;
+    firstOperand = currentDigit;
     console.log(firstOperand);
   } else {
     secondOperand += currentDigit;
     console.log(secondOperand);
   }
 
-  if (screen.textContent === '0') {
+  if (
+    screen.textContent === '0' &&
+    currentDigit !== '0' &&
+    currentDigit !== '.'
+  ) {
     screen.textContent += currentDigit;
   } else {
     screen.textContent += currentDigit;
-  }
-
-  if (screen.textContent.charAt(0) === '0' && currentDigit !== '0') {
-    screen.textContent = screen.textContent.slice(1);
   }
 }
 
@@ -100,7 +100,7 @@ function divide() {
 function operate(e, isOperator = false) {
   let result = 0;
 
-  if (currentOperator == null) {
+  if (currentOperator === null) {
     return;
   }
 
@@ -144,7 +144,6 @@ function delLastNum() {
     if (firstOperand === 0) {
       return;
     }
-
     length = firstOperand.includes('-')
       ? firstOperand.length - 1
       : firstOperand.length;
@@ -233,7 +232,9 @@ function handleKeyup(e) {
   } else if (!isNaN(e.key)) {
     selectDigit(e);
   } else if (e.key === 'Enter') {
-    operate(e.key);
+    operate(e);
+  } else if (e.key === 'Backspace') {
+    delLastNum(e);
   }
 }
 
