@@ -1,23 +1,27 @@
+let screens = {};
 const operators = document.querySelectorAll('.operator');
 const digits = document.querySelectorAll('.digit');
-const screen = document.getElementById('screen');
-const equal = document.getElementById('equal');
-const clear = document.getElementById('clear');
-const del = document.getElementById('del');
-const negative = document.getElementById('plus-minus');
-const decimal = document.getElementById('decimal');
-const percent = document.getElementById('percent');
+const equals = document.querySelectorAll('.equal');
+const clears = document.querySelectorAll('.clear');
+const dels = document.querySelectorAll('.del');
+const negatives = document.querySelectorAll('.plus-minus');
+const decimals = document.querySelectorAll('.decimal');
+const percents = document.querySelectorAll('.percent');
+const calculators = document.querySelectorAll('.calculator');
 
-let firstOperand = screen.textContent;
-let secondOperand = '';
-let currentOperator = null;
 let shouldClearScreen = false;
 const validOperators = ['+', '-', '/', '*'];
+
+function setCurrentCalculator(e) {
+  currentScreenID = e.target.querySelector('.screen').id;
+  console.log(currentScreenID);
+  console.log(screens);
+}
 
 function selectDigit(e) {
   console.log(e);
   if (shouldClearScreen) {
-    screen.textContent = '';
+    screens[currentScreenID].display.textContent = '';
     shouldClearScreen = false;
   }
   let currentDigit = null;
@@ -26,22 +30,30 @@ function selectDigit(e) {
   } else if (e.type === 'keyup') {
     currentDigit = e.key;
   }
-  if (currentOperator === null) {
-    firstOperand = currentDigit;
-    console.log(firstOperand);
+  if (screens[currentScreenID].currentOperator === null) {
+    screens[currentScreenID].firstOperand += currentDigit;
+    console.log(screens[currentScreenID].firstOperand);
   } else {
-    secondOperand += currentDigit;
-    console.log(secondOperand);
+    screens[currentScreenID].secondOperand += currentDigit;
+    console.log(screens[currentScreenID].secondOperand);
   }
 
   if (
-    screen.textContent === '0' &&
+    screens[currentScreenID].display.textContent === '0' &&
     currentDigit !== '0' &&
     currentDigit !== '.'
   ) {
-    screen.textContent += currentDigit;
+    screens[currentScreenID].display.textContent += currentDigit;
   } else {
-    screen.textContent += currentDigit;
+    screens[currentScreenID].display.textContent += currentDigit;
+  }
+
+  if (
+    screens[currentScreenID].display.textContent.length > 1 &&
+    screens[currentScreenID].display.textContent.startsWith('0')
+  ) {
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].display.textContent.slice(1);
   }
 }
 
@@ -54,15 +66,22 @@ function selectOperator(e) {
     selectedOperator = e.key;
   }
 
-  if (currentOperator !== null && secondOperand !== '') {
+  if (
+    screens[currentScreenID].currentOperator !== null &&
+    screens[currentScreenID].secondOperand !== ''
+  ) {
     operate(e, true);
   }
 
-  if (firstOperand !== screen.textContent) {
-    firstOperand = screen.textContent;
+  if (
+    screens[currentScreenID].firstOperand !==
+    screens[currentScreenID].display.textContent
+  ) {
+    screens[currentScreenID].firstOperand =
+      screens[currentScreenID].display.textContent;
   }
 
-  currentOperator = selectedOperator;
+  screens[currentScreenID].currentOperator = selectedOperator;
   shouldClearScreen = true;
 
   console.log(selectedOperator);
@@ -70,26 +89,38 @@ function selectOperator(e) {
 
 function add() {
   return parseFloat(
-    (parseFloat(firstOperand) + parseFloat(secondOperand)).toFixed(3)
+    (
+      parseFloat(screens[currentScreenID].firstOperand) +
+      parseFloat(screens[currentScreenID].secondOperand)
+    ).toFixed(3)
   );
 }
 
 function subtract() {
   return parseFloat(
-    (parseFloat(firstOperand) - parseFloat(secondOperand)).toFixed(3)
+    (
+      parseFloat(screens[currentScreenID].firstOperand) -
+      parseFloat(screens[currentScreenID].secondOperand)
+    ).toFixed(3)
   );
 }
 
 function multiply() {
   return parseFloat(
-    (parseFloat(firstOperand) * parseFloat(secondOperand)).toFixed(3)
+    (
+      parseFloat(screens[currentScreenID].firstOperand) *
+      parseFloat(screens[currentScreenID].secondOperand)
+    ).toFixed(3)
   );
 }
 
 function divide() {
-  if (secondOperand > 0) {
+  if (screens[currentScreenID].secondOperand > 0) {
     return parseFloat(
-      (parseFloat(firstOperand) / parseFloat(secondOperand)).toFixed(3)
+      (
+        parseFloat(screens[currentScreenID].firstOperand) /
+        parseFloat(screens[currentScreenID].secondOperand)
+      ).toFixed(3)
     );
   } else {
     alert(`You can't divide by 0!! Please input a new number to divide by!!`);
@@ -100,64 +131,83 @@ function divide() {
 function operate(e, isOperator = false) {
   let result = 0;
 
-  if (currentOperator === null) {
+  if (screens[currentScreenID].currentOperator === null) {
     return;
   }
 
-  if (firstOperand != '' && secondOperand == '') {
-    secondOperand = firstOperand;
-    firstOperand = screen.textContent;
+  if (
+    screens[currentScreenID].firstOperand != '' &&
+    screens[currentScreenID].secondOperand == ''
+  ) {
+    screens[currentScreenID].secondOperand =
+      screens[currentScreenID].firstOperand;
+    screens[currentScreenID].firstOperand =
+      screens[currentScreenID].display.textContent;
   }
 
-  if (currentOperator === '+') {
+  if (screens[currentScreenID].currentOperator === '+') {
     result = add();
-  } else if (currentOperator === '-') {
+  } else if (screens[currentScreenID].currentOperator === '-') {
     result = subtract();
-  } else if (currentOperator === '*') {
+  } else if (screens[currentScreenID].currentOperator === '*') {
     result = multiply();
-  } else if (currentOperator === '/') {
+  } else if (screens[currentScreenID].currentOperator === '/') {
     result = divide();
   }
 
   if (Number.isInteger(result)) {
     result = result.toString();
   }
-  screen.textContent = result;
+  screens[currentScreenID].display.textContent = result;
 
-  firstOperand = isOperator ? result.toString() : secondOperand;
-  secondOperand = '';
-  currentOperator = isOperator ? null : currentOperator;
+  screens[currentScreenID].firstOperand = isOperator
+    ? result.toString()
+    : screens[currentScreenID].secondOperand;
+  screens[currentScreenID].secondOperand = '';
+  screens[currentScreenID].currentOperator = isOperator
+    ? null
+    : screens[currentScreenID].currentOperator;
   shouldClearScreen = true;
 }
 
 function clearResult() {
-  screen.textContent = '0';
-  firstOperand = screen.textContent;
-  secondOperand = '';
-  currentOperator = null;
+  screens[currentScreenID].display.textContent = '0';
+  screens[currentScreenID].firstOperand =
+    screens[currentScreenID].display.textContent;
+  screens[currentScreenID].secondOperand = '';
+  screens[currentScreenID].currentOperator = null;
   shouldClearScreen = false;
 }
 
 function delLastNum() {
   let length = 0;
-  if (currentOperator === null) {
-    if (firstOperand === 0) {
+  firstOperand = screens[currentScreenID].display.textContent;
+  if (screens[currentScreenID].currentOperator === null) {
+    if (screens[currentScreenID].firstOperand === 0) {
       return;
     }
-    length = firstOperand.includes('-')
-      ? firstOperand.length - 1
-      : firstOperand.length;
-    firstOperand = length > 1 ? firstOperand.slice(0, -1) : firstOperand;
-    screen.textContent = firstOperand;
+    length = screens[currentScreenID].firstOperand.includes('-')
+      ? screens[currentScreenID].firstOperand.length - 1
+      : screens[currentScreenID].firstOperand.length;
+    screens[currentScreenID].firstOperand =
+      length > 1
+        ? screens[currentScreenID].firstOperand.slice(0, -1)
+        : screens[currentScreenID].firstOperand;
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].firstOperand;
   } else {
-    if (secondOperand === '0') {
+    if (screens[currentScreenID].secondOperand === '0') {
       return;
     }
-    length = secondOperand.includes('-')
-      ? secondOperand.length - 1
-      : secondOperand.length;
-    secondOperand = length > 1 ? secondOperand.slice(0, -1) : secondOperand;
-    screen.textContent = secondOperand;
+    length = screens[currentScreenID].secondOperand.includes('-')
+      ? screens[currentScreenID].secondOperand.length - 1
+      : screens[currentScreenID].secondOperand.length;
+    screens[currentScreenID].secondOperand =
+      length > 1
+        ? screens[currentScreenID].secondOperand.slice(0, -1)
+        : screens[currentScreenID].secondOperand;
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].secondOperand;
   }
 }
 
@@ -166,27 +216,43 @@ function toggleSign(number) {
 }
 
 function makeNegative() {
-  if (currentOperator == null || secondOperand == '') {
-    firstOperand = screen.textContent;
-    firstOperand = toggleSign(firstOperand);
-    screen.textContent = firstOperand;
+  if (
+    screens[currentScreenID].currentOperator == null ||
+    screens[currentScreenID].secondOperand == ''
+  ) {
+    screens[currentScreenID].firstOperand =
+      screens[currentScreenID].display.textContent;
+    screens[currentScreenID].firstOperand = toggleSign(
+      screens[currentScreenID].firstOperand
+    );
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].firstOperand;
   } else {
-    secondOperand = toggleSign(secondOperand);
-    screen.textContent = secondOperand;
+    screens[currentScreenID].secondOperand = toggleSign(
+      screens[currentScreenID].secondOperand
+    );
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].secondOperand;
   }
 }
 
 function makeDecimal() {
-  if (currentOperator === null) {
-    firstOperand = firstOperand.includes('.')
-      ? firstOperand
-      : firstOperand + '.';
-    screen.textContent = firstOperand;
+  if (screens[currentScreenID].currentOperator === null) {
+    screens[currentScreenID].firstOperand = screens[
+      currentScreenID
+    ].firstOperand.includes('.')
+      ? screens[currentScreenID].firstOperand
+      : screens[currentScreenID].firstOperand + '.';
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].firstOperand;
   } else {
-    secondOperand = secondOperand.includes('.')
-      ? secondOperand
-      : secondOperand + '.';
-    screen.textContent = secondOperand;
+    screens[currentScreenID].secondOperand = screens[
+      currentScreenID
+    ].secondOperand.includes('.')
+      ? screens[currentScreenID].secondOperand
+      : screens[currentScreenID].secondOperand + '.';
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].secondOperand;
   }
 }
 
@@ -195,27 +261,59 @@ function togglePercent(number) {
 }
 
 function makePercent() {
-  firstOperand = screen.textContent;
-  if (currentOperator === null || secondOperand === '') {
-    firstOperand = togglePercent(firstOperand);
-    screen.textContent = firstOperand;
+  screens[currentScreenID].firstOperand = screen.textContent;
+  if (
+    screens[currentScreenID].currentOperator === null ||
+    screens[currentScreenID].secondOperand === ''
+  ) {
+    screens[currentScreenID].firstOperand = togglePercent(
+      screens[currentScreenID].firstOperand
+    );
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].firstOperand;
   } else {
-    secondOperand = togglePercent(secondOperand);
-    screen.textContent = secondOperand;
+    screens[currentScreenID].secondOperand = togglePercent(
+      screens[currentScreenID].secondOperand
+    );
+    screens[currentScreenID].display.textContent =
+      screens[currentScreenID].secondOperand;
   }
 }
 
-equal.addEventListener('click', operate);
+calculators.forEach(calculator => {
+  calculator.addEventListener('mouseenter', setCurrentCalculator);
+  let currentScreen = calculator.querySelector('.screen').id;
+  screens[currentScreen] = {
+    display: document.getElementById(currentScreen),
+    firstOperand: '',
+    secondOperand: '',
+    currentOperator: null,
+  };
+});
 
-clear.addEventListener('click', clearResult);
+equals.forEach(equal => {
+  equal.addEventListener('click', operate);
+});
 
-del.addEventListener('click', delLastNum);
+clears.forEach(clear => {
+  clear.addEventListener('click', clearResult);
+});
 
-negative.addEventListener('click', makeNegative);
+dels.forEach(del => {
+  del.addEventListener('click', delLastNum);
+});
 
-decimal.addEventListener('click', makeDecimal);
+negatives.forEach(negative => {
+  negative.addEventListener('click', makeNegative);
+});
 
-percent.addEventListener('click', makePercent);
+decimals.forEach(decimal => {
+  decimal.addEventListener('click', makeDecimal);
+});
+
+percents.forEach(percent => {
+  percent.addEventListener('click', makePercent);
+});
 
 operators.forEach(operator => {
   operator.addEventListener('click', selectOperator);
